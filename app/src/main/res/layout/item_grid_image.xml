@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.wowfly.android.core.SquareLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imagethumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/descr_image"
+        android:scaleType="centerCrop" />
+
+<!--    <TextView
+        android:id="@+id/text"
+        android:background="#88000000"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />-->
+
+    <ImageView
+        android:id="@+id/upload_tag"
+        android:visibility="gone"
+        android:src="@drawable/ic_selection_tag"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ProgressBar
+        android:id="@+id/imageprogress"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:visibility="gone"
+        android:layout_alignBottom="@+id/imagethumb"
+        android:max="100"
+        style="@style/UploadProgressBar" />
+</com.wowfly.android.core.SquareLayout>

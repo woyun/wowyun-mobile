@@ -1,0 +1,27 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <!-- Customize your theme here. -->
+    </style>
+<!--    <style name="ProgressBarStyle" parent="@android:style/Widget.ProgressBar.Horizontal"/>-->
+
+    <style name="UploadProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+    </style>
+    <style name="UploadTheme" parent="@android:style/Theme.Holo">
+        <item name="android:actionModeBackground">@android:color/darker_gray</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_header_status_done</item>
+        <item name="android:actionBarStyle">@style/MyActionBarStyle</item>
+
+    </style>
+    <style name="MyActionBarStyle" parent="android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@android:color/darker_gray</item>
+    </style>
+
+    <style name="ImageViewerTheme" parent="android:Theme.Dialog">
+
+        <!-- No backgrounds, titles or window float -->
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+</resources>

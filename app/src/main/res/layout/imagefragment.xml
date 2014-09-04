@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:id="@+id/layout_imageview_status"
+        android:orientation="horizontal"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/imageview_infoheader"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/imagegridview"
+            android:stretchMode="columnWidth"
+            android:gravity="center"
+            android:horizontalSpacing="2dip"
+            android:verticalSpacing="16dip"
+            android:scrollbarStyle="insideOverlay"
+            android:columnWidth="@dimen/itemSize"
+            android:numColumns="3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+        </GridView>
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="2dp"
+            android:background="@drawable/bg_quickbutton"
+            android:layout_alignParentBottom="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:text="@string/phone_label"
+                android:id="@+id/image_phone_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+            <!--            <Button
+                            android:text="@string/cloud_label"
+                            android:id="@+id/image_cloud_button"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content" />-->
+        </LinearLayout>
+    </RelativeLayout>
+
+
+</LinearLayout>

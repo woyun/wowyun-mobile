@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">沃云</string>
+    <string name="title_section1">图片浏览</string>
+    <string name="title_section2">视频浏览</string>
+    <string name="title_section3">语音通话</string>
+    <string name="action_settings">设置</string>
+    <string name="action_about">关于</string>
+    <string name="upload_select_info">当前选中%1$d个文件</string>
+    <string name="action_upload">上传文件</string>
+    <string name="action_add_buddy">添加设备</string>
+    <string name="title_media_share">分享图片和视频</string>
+    <string name="images_header_status">当前总共有%1$d个图片文件</string>
+    <string name="videos_header_status">当前总共有%1$d个视频文件</string>
+    <string name="title_add_buddy">添加数码相框</string>
+    <string name="jidtext">数码相框ID</string>
+    <string name="action_cancel">取消</string>
+    <string name="login_text_username">用户名：</string>
+    <string name="login_text_password">密&#160;&#160;&#160;&#160;码：</string>
+    <string name="register_checked_password">密码确认：</string>
+    <string name="register_ok_button">开始注册</string>
+    <string name="descr_image">Image</string>
+    <string name="action_login_btn">登陆沃云</string>
+    <string name="register_backto_login">返回登陆界面</string>
+    <string name="action_register_jid">注册新用户</string>
+    <string name="action_buddy_add_success">添加用户成功</string>
+    <string name="action_buddy_add_failure">添加用户失败</string>
+    <string name="action_login_start">正在登陆沃云服务平台...</string>
+    <string name="action_login_success">沃云服务平台登陆成功</string>
+    <string name="action_login_failure">沃云服务平台登陆失败，请检查网络状况及用户名和密码</string>
+    <string name="action_register_success">沃云服务注册成功</string>
+    <string name="action_register_failure">沃云服务注册失败</string>
+    <string name="register_invalid_password">密码不一致，请重新输入</string>
+    <string name="phone_label">本地浏览</string>
+    <string name="cloud_label">云端浏览</string>
+    <string name="title_folder_selection">文件夹选择</string>
+    <string name="dialog_buddy_option1">消息</string>
+    <string name="dialog_buddy_option1_details">发送即时消息</string>
+    <string name="dialog_buddy_option2">相册</string>
+    <string name="dialog_buddy_option2_details">查看该设备的云端相册</string>
+    <string name="dialog_buddy_option3">设置</string>
+    <string name="dialog_buddy_option3_details">远程管理该数码相框的系统设置</string>
+    <string name="action_fetch_webalbum">正在获取云端相册数据</string>
+    <string name="action_fetch_webalbum_failure">获取云端相册失败...</string>
+    <string name="text_webalbum_404">云端相册没有照片</string>
+</resources>
