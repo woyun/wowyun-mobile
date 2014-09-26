@@ -26,6 +26,8 @@
         <activity android:name=".MainActivity"/>
         <activity android:name=".RegisterActivity"/>
         <activity android:name=".WebAlbumActivity" />
+        <activity android:name=".SNSSyncActivity" />
+        <activity android:name=".OptionActivity" />
     </application>
 
 </manifest>

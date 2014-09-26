@@ -24,7 +24,7 @@ public class WowYunApp extends Application {
     public static final int BUDDY_ADD_SUCCESS=9100;
     public static final int BUDDY_ADD_FAILURE=9101;
     public static final int BUDDY_LIST_UPDATE=9102;
-
+    public static final int BUDDY_LIST_BUDDY_REMOVE=9103;
 
     public static class UploadDataItem {
         public String path;
@@ -34,7 +34,18 @@ public class WowYunApp extends Application {
 
     public XMPPService getXMPP() {
         Log.i(TAG, "mXMPP = " + mXMPP);
-        return mXMPP;
+        if(mXMPP != null) {
+            if(mXMPP.isConnected()) {
+                return mXMPP;
+            } else {
+                mXMPP.reConnect();
+                if(mXMPP.isConnected())
+                    return mXMPP;
+                else
+                    return null;
+            }
+        }
+        return null;
     }
 
     public MediaInfo getMediaInfo() {
@@ -61,5 +72,9 @@ public class WowYunApp extends Application {
             }
         };
         new Thread(runnable).start();
+    }
+
+    public void onTerminate() {
+        Log.i(TAG, " wowyun-mobile terminate now");
     }
 }

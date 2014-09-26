@@ -61,9 +61,52 @@ public class VideoViewFragment extends Fragment {
     }
 
     private void showFolderListDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.title_folder_selection);
         final List<Map<String, Object>> bucketList = mLoader.getMediaInfo().getBucketList(false, mPref);
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        dialog.cancel();
+                        int n = bucketList.size();
+                        Set<String> folders = new HashSet<String>();
+                        for(int idx=0; idx<n; idx++) {
+                            Map<String, Object> item = (Map<String, Object>) bucketList.get(idx);
+                            Boolean bChecked = (Boolean) item.get(new String("checked"));
+                            Log.i(TAG, " bucket = " + item.get(new String("bucket")) + " checked = " + bChecked);
+                            if(bChecked == true) {
+                                String bucket = (String) item.get(new String("bucket"));
+                                folders.add(bucket);
+                            }
+                        }
+
+                        Log.i(TAG, " folders.filter.sets = " + folders.toString());
+                        SharedPreferences.Editor editor = mPref.edit();
+                        editor.putStringSet("video.bucket.filter", folders);
+                        editor.commit();
+
+                        //mLoader.reset();
+                        mLoader.getMediaInfo().getVideosInfo(mPref);
+                        BaseAdapter adapter = (BaseAdapter)listView.getAdapter();
+                        adapter.getCount();
+                        adapter.notifyDataSetInvalidated();
+                        String sInfo = getResources().getString(R.string.videos_header_status);
+                        sInfo = String.format(sInfo, mLoader.getMediaInfo().getVideoCount());
+                        mInfoHeader.setText(sInfo);
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        dialog.cancel();
+                        break;
+                }
+            }
+        };
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.title_folder_selection)
+               .setPositiveButton("应用", dialogClickListener)
+               .setNegativeButton("取消", dialogClickListener);
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View layout = inflater.inflate(R.layout.dialog_folder_list, null);
@@ -71,9 +114,18 @@ public class VideoViewFragment extends Fragment {
 
         final AlertDialog dlg = builder.create();
         dlg.show();
-        dlg.setOnCancelListener(new DialogInterface.OnCancelListener() {
+/*        Button cancelBtn = (Button)layout.findViewById(R.id.folderlist_cancel);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialogInterface) {
+            public void onClick(View view) {
+                Log.i(TAG, " Cancel button clicked");
+                dlg.cancel();
+            }
+        });
+        Button applyBtn = (Button) layout.findViewById(R.id.folderlist_apply);
+        applyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 int n = bucketList.size();
                 Set<String> folders = new HashSet<String>();
                 for(int idx=0; idx<n; idx++) {
@@ -99,9 +151,9 @@ public class VideoViewFragment extends Fragment {
                 String sInfo = getResources().getString(R.string.videos_header_status);
                 sInfo = String.format(sInfo, mLoader.getMediaInfo().getVideoCount());
                 mInfoHeader.setText(sInfo);
-
+                dlg.cancel();
             }
-        });
+        });*/
 
         final ListView _buddyList = (ListView) layout.findViewById(R.id.dialog_folderlist);
         SimpleAdapter sa = new SimpleAdapter((MainActivity)getActivity(), bucketList, R.layout.item_list_folder,
@@ -152,7 +204,6 @@ public class VideoViewFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //mLoader.getMediaInfo().getBucketList(true);
-
                 showFolderListDialog();
             }
         });

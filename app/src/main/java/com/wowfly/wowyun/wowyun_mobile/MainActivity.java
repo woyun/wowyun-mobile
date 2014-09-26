@@ -3,6 +3,7 @@ package com.wowfly.wowyun.wowyun_mobile;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,7 +57,9 @@ import org.apache.http.Header;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
 
 public class MainActivity extends Activity implements ActionBar.TabListener, ChatManagerListener, MessageListener, AbsListView.MultiChoiceModeListener {
 
@@ -87,6 +92,48 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Cha
      */
     ViewPager mViewPager;
 
+
+    private RosterListener mRosterListener = new RosterListener() {
+        @Override
+        public void entriesAdded(Collection<String> strings) {
+            for(String item: strings) {
+                Log.i(TAG, " buddy added " + item);
+            }
+        }
+
+        @Override
+        public void entriesUpdated(Collection<String> strings) {
+            for(String item: strings) {
+                Log.i(TAG, " buddy entriesUpdated " + item);
+            }
+        }
+
+        @Override
+        public void entriesDeleted(Collection<String> strings) {
+            for(String item: strings) {
+                Log.i(TAG, " buddy entriesDeleted " + item);
+            }
+        }
+
+        @Override
+        public void presenceChanged(Presence presence) {
+            if(mBuddyListFragment != null) {
+                Handler handler = mBuddyListFragment.getHandler();
+                Log.i(TAG, " presenceChanged " + presence.getType().toString() + " jid = " + presence.getFrom());
+                if (presence.getType() == Presence.Type.unavailable) {
+                    android.os.Message msg = new android.os.Message();
+                    msg.what = WowYunApp.BUDDY_LIST_UPDATE;
+                    handler.sendMessage(msg);
+                    Log.i(TAG, " buddy " + presence.getFrom() + " status change to unavailable ");
+                } else if (presence.getType() == Presence.Type.available) {
+                    android.os.Message msg = new android.os.Message();
+                    msg.what = WowYunApp.BUDDY_LIST_UPDATE;
+                    handler.sendMessage(msg);
+                    Log.i(TAG, " buddy " + presence.getFrom() + " status change to available ");
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +170,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Cha
         mAPP = (WowYunApp) getApplication();
         mXMPP = mAPP.getXMPP();
         mXMPP.setChatManagerListener(MainActivity.this);
+        mXMPP.addRosterListener(mRosterListener);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
@@ -294,6 +342,15 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Cha
         }
         mVideoUploadList.clear();
 
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(false);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     private void showBuddyListDialog() {
@@ -469,6 +526,35 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Cha
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, OptionActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.action_quit:
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                //Yes button clicked
+                                MainActivity.this.finish();
+                                //System.exit(0);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("是否退出?")
+                        .setTitle("提醒")
+                        .setPositiveButton("确认", dialogClickListener)
+                        .setNegativeButton("取消", dialogClickListener).show();
+                break;
+
             case R.id.action_add_buddy:
                 showAddBuddyDialog();
                 break;

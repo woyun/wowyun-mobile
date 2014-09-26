@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="沃云">
+        <CheckBoxPreference android:key="com.wowfly.wowyun.autologin"
+            android:summary="记住用户名，自动登录沃云平台"
+            android:title="自动登录" />
+    </PreferenceCategory>
+
+<!--    <PreferenceCategory android:title="浏览文件夹设置">
+        <CheckBoxPreference android:key="com.wowfly.wowyun.imagefolders"
+            android:summary="图片浏览文件夹选择"
+            android:title="图片浏览" />
+        <CheckBoxPreference android:key="com.wowfly.wowyun.videofolders"
+            android:summary="视频浏览文件夹选择"
+            android:title="视频浏览" />
+    </PreferenceCategory>-->
+</PreferenceScreen>

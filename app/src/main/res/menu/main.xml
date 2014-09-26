@@ -17,8 +17,8 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
-    <item android:id="@+id/action_about"
-        android:title="@string/action_about"
+    <item android:id="@+id/action_quit"
+        android:title="@string/action_quit"
         android:orderInCategory="102"
         android:showAsAction="never" />
 </menu>

@@ -15,8 +15,10 @@ import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.provider.VCardProvider;
@@ -143,7 +145,7 @@ public class XMPPService {
     }
 
     public int getBuddyCount() {
-        return mBuddyDataList.size();
+        return mBuddyInfo.size();
     }
 
     public BuddyInfo getBuddyInfo(int pos) {
@@ -154,33 +156,70 @@ public class XMPPService {
         }
     }
 
+    public void removeBuddy(String jid) {
+        Roster r = mConn.getRoster();
+        Collection<RosterEntry> rlist = r.getEntries();
+
+        for(RosterEntry entry: rlist) {
+            if(entry.getUser().equals(jid)) {
+                RosterPacket packet = new RosterPacket();
+                packet.setType(IQ.Type.SET);
+                RosterPacket.Item item = new RosterPacket.Item(jid, null);
+                item.setItemType(RosterPacket.ItemType.remove);
+                packet.addRosterItem(item);
+                if(mConn.isConnected() == false) {
+                    try {
+                        mConn.connect();
+                    } catch (XMPPException e) {
+                        e.printStackTrace();
+                    }
+                }
+                mConn.sendPacket(packet);
+
+                try {
+                    r.removeEntry(entry);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+                Log.i(TAG, "remove " + jid + " successfully");
+                break;
+            }
+        }
+        //r.removeEntry();
+    }
+
+
+    public void addRosterListener(RosterListener listener) {
+        if(mConn.isConnected()) {
+            Log.i(TAG, "add new roster listener ");
+            mConn.getRoster().addRosterListener(listener);
+        }
+    }
+
     public void getBuddyList() {
         Roster r = mConn.getRoster();
 
-        //r.reload();
-        mRECollection = r.getEntries();
-
-        mBuddyDataList.clear();
         mBuddyInfo.clear();
+        mBuddyDataList.clear();
 
+        mRECollection = r.getEntries();
         for(RosterEntry entry: mRECollection) {
-            Log.i(TAG, "name = " + entry.getName() + " user = " + entry.getUser());
+            char first;
             BuddyInfo info = new BuddyInfo();
             info.name = entry.getName();
             info.jid = entry.getUser();
             info.isAvailable = r.getPresence(info.jid).isAvailable();
-            if(info.name == null) {
-/*                VCard card = new VCard();
-                try {
-                    card.load(mConn, info.jid);
-                    //Log.i(TAG, "nickname " + card.getNickName() + " xml: " + card.toXML());
-                    if (card.getNickName() != null)
-                        info.name = card.getNickName();
-                } catch (XMPPException e) {
 
-                }*/
+            Log.i(TAG, "name = " + entry.getName() + " user = " + entry.getUser() + " isAvailable " + info.isAvailable);
+            if(info.name == null) {
+                int sep = info.jid.indexOf('@');
+                info.name = info.jid.substring(0, sep).toUpperCase();
             }
-            mBuddyInfo.add(info);
+            if(info.name != null) {
+                first = info.name.charAt(0);
+                //if(first == 'D' || first == 'd')
+                    mBuddyInfo.add(info);
+            }
 
             Map<String, Object> item = new HashMap<String, Object>();
             item.put("jid", info.jid);
@@ -190,11 +229,10 @@ public class XMPPService {
                 info.name = info.jid.substring(0, sep).toUpperCase();
             }
 
-
-            char first = info.name.charAt(0);
-            Log.i(TAG, "info.name = " + info.name + " first char = " + first);
+            first = info.name.charAt(0);
+            //Log.i(TAG, "info.name = " + info.name + " first char = " + first);
             if(first == 'D') {
-                Log.i(TAG, " digital device detected " + info.name);
+                //Log.i(TAG, " digital device detected " + info.name);
                 item.put("icon", R.drawable.ic_digital_device);
             } else {
                 if (info.isAvailable)
@@ -207,23 +245,28 @@ public class XMPPService {
                 item.put("name", info.name);
             } else
                 item.put("name", info.jid);
-            mBuddyDataList.add(item);
+            //if(first == 'D')
+                mBuddyDataList.add(item);
         }
         bBuddyData = true;
     }
 
     public List<Map<String, Object>> getBuddyData() {
-        Log.i(TAG, " getBuddyData bLogin = " + bLogin + " size = " + mBuddyDataList.size());
+        //Log.i(TAG, " getBuddyData bLogin = " + bLogin + " size = " + mBuddyDataList.size());
         //if(bBuddyData==false)
         getBuddyList();
-        if(bLogin) {
-            return mBuddyDataList;
-        }
-        return null;
+        return mBuddyDataList;
     }
 
     public String getMyJid() {
         return mMyJid;
+    }
+
+    public boolean isConnected() {
+        if(mConn != null)
+            return mConn.isConnected();
+        else
+            return false;
     }
 
     public boolean addBuddybyJid(String jid) {
@@ -264,6 +307,15 @@ public class XMPPService {
         }
     }
 
+    public void reConnect() {
+        if(mConn != null) {
+            try {
+                mConn.connect();
+            } catch (XMPPException e) {
+
+            }
+        }
+    }
     public boolean doLogin(String user, String passwd, ChatManagerListener listener) {
         try {
             if(mConn.isConnected() == false) {

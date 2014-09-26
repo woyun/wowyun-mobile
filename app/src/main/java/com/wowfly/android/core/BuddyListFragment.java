@@ -2,10 +2,13 @@ package com.wowfly.android.core;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +28,7 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.wowfly.wowyun.wowyun_mobile.MainActivity;
 import com.wowfly.wowyun.wowyun_mobile.R;
+import com.wowfly.wowyun.wowyun_mobile.SNSSyncActivity;
 import com.wowfly.wowyun.wowyun_mobile.WebAlbumActivity;
 
 import org.jivesoftware.smack.RosterEntry;
@@ -58,13 +62,25 @@ public class BuddyListFragment extends Fragment {
         mHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 switch(msg.what) {
-                    case WowYunApp.BUDDY_LIST_UPDATE:
+                    case WowYunApp.BUDDY_LIST_BUDDY_REMOVE:
+                        mXMPP.getBuddyList();
                         BaseAdapter adapter = (BaseAdapter) buddylist.getAdapter();
-                        adapter.notifyDataSetInvalidated();
+                        //adapter.notifyDataSetInvalidated();
+                        adapter.notifyDataSetChanged();
+                        //ListView listView = (ListView) buddylist;
+                        //listView.removeViewAt(msg.arg1);
+                        break;
+                    case WowYunApp.BUDDY_LIST_UPDATE:
+                        mXMPP.getBuddyList();
+                        adapter = (BaseAdapter) buddylist.getAdapter();
+                        //adapter.notifyDataSetInvalidated();
+                        adapter.notifyDataSetChanged();
                         break;
                     case WowYunApp.BUDDY_ADD_SUCCESS:
                         Toast.makeText(getActivity().getApplicationContext(), R.string.action_buddy_add_success, Toast.LENGTH_SHORT).show();
                         mXMPP.getBuddyList();
+                        adapter = (BaseAdapter) buddylist.getAdapter();
+                        adapter.notifyDataSetChanged();
                         break;
 
                     case WowYunApp.BUDDY_ADD_FAILURE:
@@ -95,7 +111,7 @@ public class BuddyListFragment extends Fragment {
                 BaseAdapter adapter = (BaseAdapter )adapterView.getAdapter();
                 XMPPService.BuddyInfo info = (XMPPService.BuddyInfo)adapter.getItem(i);
                 Log.i(TAG, "Item Click " + i + " " + info.name + " " + info.jid);
-                showBuddyOptionDialog(info);
+                showBuddyOptionDialog(info, i);
                 return true;
             }
         });
@@ -108,7 +124,43 @@ public class BuddyListFragment extends Fragment {
         });
     }
 
-    private void showBuddyOptionDialog(final XMPPService.BuddyInfo info) {
+    private void showBuddyRemoveDialog(final String jid,final int idx) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        Log.i(TAG, " remove buddy " + jid);
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                mXMPP.removeBuddy(jid);
+                                Message msg = new Message();
+                                msg.what = WowYunApp.BUDDY_LIST_BUDDY_REMOVE;
+                                msg.arg1 = idx;
+                                mHandler.sendMessage(msg);
+                            }
+                        };
+                        //mXMPP.removeBuddy(jid);
+                        new Thread(runnable).start();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        dialog.cancel();
+                        break;
+                }
+            }
+        };
+
+        new AlertDialog.Builder(getActivity()).setTitle("删除设备")
+                .setMessage("是否确定删除该设备？")
+                .setPositiveButton("确定", dialogClickListener)
+                .setNegativeButton("取消", dialogClickListener)
+                .show();
+    }
+
+    private void showBuddyOptionDialog(final XMPPService.BuddyInfo info, int idx) {
         Log.i(TAG, "show option dialog for " + info.jid);
         List<Map<String, Object>> optionList = new ArrayList<Map<String, Object>>();
         Map<String, Object> item = new HashMap<String, Object>();
@@ -119,14 +171,25 @@ public class BuddyListFragment extends Fragment {
 
         item = new HashMap<String, Object>();*/
         //item.put("icon", R.drawable.ic_option_icon_album);
+        item.put("name", "删除该设备");
+        item.put("details", "");
+        optionList.add(item);
+
+        item = new HashMap<String, Object>();
         item.put("name", getResources().getString(R.string.dialog_buddy_option2));
         item.put("details", getResources().getString(R.string.dialog_buddy_option2_details));
         optionList.add(item);
 
-        item = new HashMap<String, Object>();
+/*        item = new HashMap<String, Object>();
         //item.put("icon", R.drawable.ic_option_icon_setting);
         item.put("name", getResources().getString(R.string.dialog_buddy_option3));
         item.put("details", getResources().getString(R.string.dialog_buddy_option3_details));
+        optionList.add(item);*/
+
+        item = new HashMap<String, Object>();
+        //item.put("icon", R.drawable.ic_option_icon_setting);
+        item.put("name", getResources().getString(R.string.dialog_buddy_option4));
+        item.put("details", getResources().getString(R.string.dialog_buddy_option4_details));
         optionList.add(item);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -150,13 +213,18 @@ public class BuddyListFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 switch(i) {
                     case 0:
+                        showBuddyRemoveDialog(info.jid, i);
+                        break;
+                    case 1:
                         Log.i(TAG, " start remote image activity");
                         Intent intent = new Intent(getActivity(), WebAlbumActivity.class);
                         intent.putExtra("jid", info.jid);
                         startActivity(intent);
                         break;
-                    case 1:
-                        Log.i(TAG, " ");
+                    case 2:
+                        intent = new Intent(getActivity(), SNSSyncActivity.class);
+                        intent.putExtra("jid", info.jid);
+                        startActivity(intent);
                         break;
                 }
                 dlg.cancel();
@@ -170,8 +238,6 @@ public class BuddyListFragment extends Fragment {
         Log.i(TAG, "Activity = " + getActivity());
         mAPP = (WowYunApp)getActivity().getApplication();
         mXMPP = mAPP.getXMPP();
-
-
 /*        mXMPP = mAPP.getXMPP();
         if(mXMPP != null) {
             mXMPP.getBuddyList();

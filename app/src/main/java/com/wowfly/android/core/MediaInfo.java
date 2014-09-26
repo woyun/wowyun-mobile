@@ -137,6 +137,7 @@ public class MediaInfo {
 
     public boolean getWebAlbumInfo(InputStream resp) {
         try {
+            mWebAlbumInfo.clear();
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = parserFactory.newPullParser();
             parser.setInput(resp, "utf-8");

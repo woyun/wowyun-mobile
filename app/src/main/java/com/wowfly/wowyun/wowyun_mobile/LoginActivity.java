@@ -1,11 +1,14 @@
 package com.wowfly.wowyun.wowyun_mobile;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -43,6 +46,7 @@ public class LoginActivity extends Activity implements ChatManagerListener{
 
         super.onCreate(saved);
         setContentView(R.layout.activity_login);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mAPP = (WowYunApp) getApplication();
 
@@ -60,6 +64,13 @@ public class LoginActivity extends Activity implements ChatManagerListener{
         Intent i = getIntent();
         String defaultname = i.getStringExtra("username");
 
+/*        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        if(pm.isScreenOn() == false) {
+            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK|PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.ON_AFTER_RELEASE,"MyLock");
+            wl.acquire(10000);
+            PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyCpuLock");
+            wl_cpu.acquire(10000);
+        }*/
 
         mHandler = new Handler() {
 
@@ -137,7 +148,7 @@ public class LoginActivity extends Activity implements ChatManagerListener{
                                 mXMPP = mAPP.getXMPP();
                                 if(mXMPP == null) {
                                     try {
-                                        Thread.sleep(200);
+                                        Thread.sleep(300);
                                     } catch (InterruptedException e) {
                                         Log.i(TAG, "sleep Exception " + e.getMessage());
                                         continue;
@@ -172,6 +183,22 @@ public class LoginActivity extends Activity implements ChatManagerListener{
                 }
             }
         });
+
+        //SinaWeiBoScrapy weibo = new SinaWeiBoScrapy(getApplicationContext());
+        //weibo.doInit();
+        //weibo.doLogin();
+        //QzoneScrapy qzoneScrapy = new QzoneScrapy(getApplicationContext(), "8065388", "xj317318", null);
+        //qzoneScrapy.doMyLogin();
+        //qzoneScrapy.doInit();
+
+/*        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        View root = findViewById(android.R.id.content);
+        if(root != null) {
+            Log.i(TAG, " set screen on");
+            root.setKeepScreenOn(true);
+        } else {
+            Log.i(TAG, " root == null");
+        }*/
     }
 
     public void chatCreated(Chat chat, boolean create) {
