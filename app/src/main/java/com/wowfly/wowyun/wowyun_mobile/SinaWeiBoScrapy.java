@@ -190,10 +190,10 @@ public class SinaWeiBoScrapy extends WebScrapy implements WebScrapy.ScrapyCallba
     private void parseWeiBoUID(byte[] resp) {
         try {
             String str = new String(resp, "utf-8");
-            int sep = str.indexOf("/info\">");
+            int sep = str.indexOf("/info?");
             String s0 = str.substring(0, sep);
             sep = s0.lastIndexOf("href=\"/");
-            weibo_uid = s0.substring(sep+7);
+            weibo_uid = s0.substring(sep+6);
             Log.i(TAG, " uid " + weibo_uid);
         } catch (UnsupportedEncodingException e) {
 

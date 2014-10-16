@@ -93,10 +93,15 @@ public class QzoneProto {
     }
 
     /** 登录 */
-    public String login() {
+    public String login(String vc) {
         String url;// 访问网址
         String text;// 提示文本
         // 验证码
+        if(vc.length() > 0) {
+            vcode = vc;
+            Log.i(TAG, " login qzone with vcode " + vcode);
+        }
+
         if (vcode == null) {
             vcode = ptui_checkVC();
             if (vcode == "1") {//需要验证码

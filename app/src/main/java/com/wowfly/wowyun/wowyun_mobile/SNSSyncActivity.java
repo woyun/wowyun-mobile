@@ -7,8 +7,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
@@ -45,9 +49,12 @@ public class SNSSyncActivity extends Activity {
     private AlertDialog mBindDlg;
     private int nItemIdx = 0;
     private ListView listView;
+    private QzoneScrapy qzoneScrapy;
+    private SinaWeiBoScrapy sinaWeiBoScrapy;
 
     public final static int BIND_SUCCESS = 0x2000;
     public final static int BIND_FAILURE = 0x2001;
+    public final static int LOGIN_VC = 0x2002;
 
     protected void onCreate(Bundle saved) {
         //ImageButton sinaweibo, qzone, qqweibo, renren;
@@ -84,6 +91,10 @@ public class SNSSyncActivity extends Activity {
         mHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 switch (msg.what) {
+                    case LOGIN_VC:
+                        showVCDialog();
+                        break;
+
                     case BIND_FAILURE:
                         Log.i(TAG, " bind action failure");
                         ProgressBar bar = (ProgressBar) mBindDlg.findViewById(R.id.login_progressbar);
@@ -167,6 +178,38 @@ public class SNSSyncActivity extends Activity {
         });
     }
 
+    private void showVCDialog() {
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        //opt.inSampleSize = 2;
+        Bitmap bm = BitmapFactory.decodeFile("/sdcard/qzone-vc.jpg", opt);
+        LayoutInflater _inflater = getLayoutInflater();
+        View _layout = _inflater.inflate(R.layout.dialog_vc_input, null);
+        final EditText _input = (EditText) _layout.findViewById(R.id.dialog_vc_input_edit);
+        ImageView imageView = (ImageView) _layout.findViewById(R.id.dialog_vc_bitmap);
+        imageView.setImageBitmap(bm);
+
+        final AlertDialog.Builder pwdBuilder = new AlertDialog.Builder(this);
+        pwdBuilder.setTitle("验证码输入")
+                .setView(_layout)
+                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Editable text = _input.getText();
+                        Log.i(TAG, " vcode " + text.toString());
+                        //person.setVC(snstype, text.toString());
+                        qzoneScrapy.doBind(text.toString().toUpperCase());
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).show();
+
+    }
+
     private void showSNSQzoneBindDialog() {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -177,8 +220,8 @@ public class SNSSyncActivity extends Activity {
                         AlertDialog dlg = (AlertDialog) dialog;
                         usernameET = (EditText) mBindDlg.findViewById(R.id.login_edit_username);
                         passwordET = (EditText) mBindDlg.findViewById(R.id.login_edit_password);
-                        QzoneScrapy sinaWeiBoScrapy = new QzoneScrapy(getApplicationContext(), usernameET.getText().toString(), passwordET.getText().toString(), mHandler);
-                        sinaWeiBoScrapy.doBind();
+                        qzoneScrapy = new QzoneScrapy(getApplicationContext(), usernameET.getText().toString(), passwordET.getText().toString(), mHandler);
+                        qzoneScrapy.doBind(null);
                         usernameET.setEnabled(false);
                         passwordET.setEnabled(false);
                         dlg.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -214,7 +257,7 @@ public class SNSSyncActivity extends Activity {
                         AlertDialog dlg = (AlertDialog) dialog;
                         usernameET = (EditText) mBindDlg.findViewById(R.id.login_edit_username);
                         passwordET = (EditText) mBindDlg.findViewById(R.id.login_edit_password);
-                        SinaWeiBoScrapy sinaWeiBoScrapy = new SinaWeiBoScrapy(getApplicationContext(), usernameET.getText().toString(), passwordET.getText().toString(), mHandler);
+                        sinaWeiBoScrapy = new SinaWeiBoScrapy(getApplicationContext(), usernameET.getText().toString(), passwordET.getText().toString(), mHandler);
                         sinaWeiBoScrapy.doBind();
                         usernameET.setEnabled(false);
                         passwordET.setEnabled(false);

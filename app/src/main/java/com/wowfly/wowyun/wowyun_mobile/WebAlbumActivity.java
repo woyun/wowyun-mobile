@@ -220,7 +220,9 @@ public class WebAlbumActivity extends Activity  {
                         ((GridView) listView).setAdapter(new WebAlbumImageAdapter());
                         break;
                     case WowYunApp.WEBALBUM_LOAD_FAILURE:
-                        status.setText(getResources().getString(R.string.action_fetch_webalbum_failure));
+                        status.setText(getResour
+
+ces().getString(R.string.action_fetch_webalbum_failure));
                         break;
                 }
             }

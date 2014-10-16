@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class QzoneScrapy extends WebScrapy implements WebScrapy.ScrapyCallback {
     private static final String TAG = "QzoneScrapy";
+    private QzoneProto qzoneProto;
 
     public QzoneScrapy(Context context, String username, String password, Handler handler) {
         loginURI = "http://ui.ptlogin2.qzone.com/cgi-bin/login?style=9&appid=549000929&pt_ttype=1&s_url=http://m.qzone.com/infocenter?g_f=";
@@ -29,6 +30,7 @@ public class QzoneScrapy extends WebScrapy implements WebScrapy.ScrapyCallback {
         //mHttpClient.setUserAgent("Mozilla/5.0 (Android 4.4.4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.44");
         mUSERNAME = username;
         mPASSWORD = password;
+        qzoneProto = new QzoneProto(mUSERNAME, mPASSWORD);
         mHandler = handler;
     }
 
@@ -48,12 +50,18 @@ public class QzoneScrapy extends WebScrapy implements WebScrapy.ScrapyCallback {
         }
     }
 
-    public void doBind() {
+    public void doBind(String vc) {
+        final String _vcode = vc;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                QzoneProto qzoneProto = new QzoneProto(mUSERNAME, mPASSWORD);
-                String info = qzoneProto.login();
+                String info;
+                if(_vcode == null) {
+                    info = qzoneProto.login("");
+                } else {
+                    info = qzoneProto.login(_vcode);
+                }
+                //String info = qzoneProto.login();
                 int sep = info.indexOf("登录成功");
                 //Log.i(TAG, " sep " + sep + " sub "+ info.substring(sep));
                 if(sep > 0) {
@@ -72,6 +80,10 @@ public class QzoneScrapy extends WebScrapy implements WebScrapy.ScrapyCallback {
                     data.putString("snstype", "qzone");
                     Log.i(TAG, " send qzone bind message " + mNICKNAME + " " + mUSERNAME);
                     msg.setData(data);
+                    mHandler.sendMessage(msg);
+                } else if(info.equals("1")) {
+                    Message msg = new Message();
+                    msg.what = SNSSyncActivity.LOGIN_VC;
                     mHandler.sendMessage(msg);
                 }
 
